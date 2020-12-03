@@ -117,8 +117,10 @@ def main(args):
             train_losses.append(train_loss)
             epoch_list.append(epoch)
             print(' Cur lr: {0:.5f}'.format(lr_scheduler.get_last_lr()[0]))
-        plt.plot(epoch_list, train_losses)
-        plt.savefig('test.png', dpi=300)
+            plt.plot(epoch_list, train_losses)
+            plt.xlabel('epoch')
+            plt.ylabel('training loss')
+            plt.savefig('test.png', dpi=300)
 
     down_optimizer = optim.SGD(down_model.parameters(), lr=0.1, weight_decay=5e-4, momentum=args.momentum)
     down_criterion = nn.CrossEntropyLoss()
