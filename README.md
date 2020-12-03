@@ -6,10 +6,10 @@
 
   
 ## Experiments
-  | Model | Pre-training Epochs | Linear Evaluation | Acc (%) |
-  |:-:|:-:|:-:|:-:|
-  | ResNet-18 (Paper) | 800 | O | 91.8 |
-  | ResNet-18 (Our) | 300 | O | 72.49 |
+  | Model | Pre-training Epochs | Batch size | Dim | Linear Evaluation | Acc (%) |
+  |:-:|:-:|:-:|:-:|:-:|:-:|
+  | ResNet-18 (Paper) | 800 | 512 | 2048 | O | 91.8 |
+  | ResNet-18 (Our) | 300 | 512 | 1024 | O | 72.49 |
 
 ## Usage
   - Dataset (CIFAR-10)
