@@ -9,7 +9,7 @@
   | Model | Pre-training Epochs | Linear Evaluation | Acc (%) |
   |:-:|:-:|:-:|:-:|
   | ResNet-18 (Paper) | 800 | O | 91.8 |
-  | ResNet-18 (Our) | 300 | O | 72.8 |
+  | ResNet-18 (Our) | 300 | O | 72.49 |
 
 ## Usage
   - Dataset (CIFAR-10)
