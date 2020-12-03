@@ -123,7 +123,7 @@ def main(args):
     down_optimizer = optim.SGD(down_model.parameters(), lr=0.1, weight_decay=5e-4, momentum=args.momentum)
     down_criterion = nn.CrossEntropyLoss()
     down_lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
-    for epoch in range(1, 151):
+    for epoch in range(1, 11):
         _train(epoch, down_train_loader, down_model, down_optimizer, down_criterion, args)
         _eval(epoch, down_test_loader, down_model, down_criterion, args)
         down_lr_scheduler.step()
