@@ -11,6 +11,7 @@
   | ResNet-18 (Paper) | 800 | 512 | 2048 | O | 91.8 |
   | ResNet-18 (Our) | 300 | 512 | 1024 | O | 72.49 |
   | ResNet-18 | 800 | 256 | 1024 | O| 83.93 |
+  | ResNet-18 | | 512 | 2048 | O | wip |
 
 ## Usage
   - Dataset (CIFAR-10)
