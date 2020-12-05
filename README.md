@@ -12,6 +12,9 @@
   | ResNet-18 (Our) | 300 | 512 | 1024 | O | 72.49 |
   | ResNet-18 | 800 | 256 | 1024 | O| 83.93 |
   | ResNet-18 | | 512 | 2048 | O | wip |
+  
+  - plot
+  <img src="https://user-images.githubusercontent.com/22078438/101241830-f8670a80-373c-11eb-9c6e-499b9f200878.png" width="400">
 
 ## Usage
   - Dataset (CIFAR-10)
