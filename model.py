@@ -98,21 +98,3 @@ class DownStreamModel(nn.Module):
         out = self.out(out)
 
         return out
-
-
-def main():
-    from config import load_args
-    m = Model(load_args())
-
-    for name, param in m.named_parameters():
-        param.requires_grad = False
-
-    for name, param in m.named_parameters():
-        print(name, param.requires_grad)
-    # x = torch.randn([2, 3, 32, 32])
-    # x2 = torch.randn([2, 3, 32, 32])
-    # print(m(x, x2))
-
-
-if __name__ == '__main__':
-    main()

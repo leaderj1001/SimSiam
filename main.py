@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 
 def save_checkpoint(model, optimizer, args, epoch):
-    print('Model Saving...')
+    print('\nModel Saving...')
     if args.device_num > 1:
         model_state_dict = model.module.state_dict()
     else:
@@ -69,7 +69,7 @@ def _train(epoch, train_loader, model, optimizer, criterion, args):
         step += 1
         total += target.size(0)
 
-    print('[Train Epoch: {0:4d}], loss: {1:.3f}, acc: {2:.3f}'.format(epoch, losses / step, acc / total * 100.))
+    print('[Down Task Train Epoch: {0:4d}], loss: {1:.3f}, acc: {2:.3f}'.format(epoch, losses / step, acc / total * 100.))
 
 
 def _eval(epoch, test_loader, model, criterion, args):
@@ -89,7 +89,17 @@ def _eval(epoch, test_loader, model, criterion, args):
 
             step += 1
             total += target.size(0)
-        print('[Test Epoch: {0:4d}], loss: {1:.3f}, acc: {2:.3f}'.format(epoch, losses / step, acc / total * 100.))
+        print('[Down Task Test Epoch: {0:4d}], loss: {1:.3f}, acc: {2:.3f}'.format(epoch, losses / step, acc / total * 100.))
+
+
+def train_eval_down_task(down_model, down_train_loader, down_test_loader, args):
+    down_optimizer = optim.SGD(down_model.parameters(), lr=args.down_lr, weight_decay=args.weight_decay, momentum=args.momentum)
+    down_criterion = nn.CrossEntropyLoss()
+    down_lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(down_optimizer, T_max=args.down_epochs)
+    for epoch in range(1, args.down_epochs + 1):
+        _train(epoch, down_train_loader, down_model, down_optimizer, down_criterion, args)
+        _eval(epoch, down_test_loader, down_model, down_criterion, args)
+        down_lr_scheduler.step()
 
 
 def main(args):
@@ -104,31 +114,26 @@ def main(args):
         model = model.cuda()
         down_model = down_model.cuda()
 
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, momentum=args.momentum)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=800)
-
     if args.pretrain:
+        optimizer = optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, momentum=args.momentum)
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=800)
+
         train_losses, epoch_list = [], []
         for epoch in range(1, args.epochs + 1):
             train_loss = pre_train(epoch, train_loader, model, optimizer, args)
-            if epoch % 25 == 0:
+            if epoch % args.print_intervals == 0:
                 save_checkpoint(model, optimizer, args, epoch)
+                args.down_epochs = 1
+                train_eval_down_task(down_model, down_train_loader, down_test_loader, args)
             lr_scheduler.step()
             train_losses.append(train_loss)
             epoch_list.append(epoch)
             print(' Cur lr: {0:.5f}'.format(lr_scheduler.get_last_lr()[0]))
-            plt.plot(epoch_list, train_losses)
-            plt.xlabel('epoch')
-            plt.ylabel('training loss')
-            plt.savefig('test.png', dpi=300)
-
-    down_optimizer = optim.SGD(down_model.parameters(), lr=0.1, weight_decay=5e-4, momentum=args.momentum)
-    down_criterion = nn.CrossEntropyLoss()
-    down_lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
-    for epoch in range(1, 11):
-        _train(epoch, down_train_loader, down_model, down_optimizer, down_criterion, args)
-        _eval(epoch, down_test_loader, down_model, down_criterion, args)
-        down_lr_scheduler.step()
+        plt.plot(epoch_list, train_losses)
+        plt.savefig('test.png', dpi=300)
+    else:
+        args.down_epochs = 810
+        train_eval_down_task(down_model, down_train_loader, down_test_loader, args)
 
 
 if __name__ == '__main__':

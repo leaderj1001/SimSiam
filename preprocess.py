@@ -54,34 +54,29 @@ class SimSiamDataset(Dataset):
         self.data = np.vstack(self.data).reshape(-1, 3, 32, 32)
         self.data = self.data.transpose((0, 2, 3, 1))  # convert to HWC
 
-        self.transform1 = transforms.Compose([
+        train_transform = transforms.Compose([
             transforms.RandomResizedCrop(self.args.img_size, scale=(0.2, 1.0)),
             transforms.RandomHorizontalFlip(),
             transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
             transforms.RandomGrayscale(0.2),
-            transforms.GaussianBlur(kernel_size=int(self.args.img_size * 0.1), sigma=(0.1, 2.0)),
+            # transforms.GaussianBlur(kernel_size=int(self.args.img_size * 0.1), sigma=(0.1, 2.0)),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ])
 
-        self.transform2 = transforms.Compose([
-            transforms.RandomResizedCrop(self.args.img_size, scale=(0.2, 1.0)),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
-            transforms.RandomGrayscale(0.2),
-            transforms.GaussianBlur(kernel_size=int(self.args.img_size * 0.1), sigma=(0.1, 2.0)),
+        test_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ])
 
-        # self._load_meta()
-
-    def _load_meta(self) -> None:
-        path = os.path.join(self.args, self.meta['filename'])
-        with open(path, 'rb') as infile:
-            data = pickle.load(infile, encoding='latin1')
-            self.classes = data[self.meta['key']]
-        self.class_to_idx = {_class: i for i, _class in enumerate(self.classes)}
+        if downstream:
+            if mode == 'train':
+                self.transform1 = train_transform
+            else:
+                self.transform1 = test_transform
+        else:
+            self.transform1 = train_transform
+            self.transform2 = train_transform
 
     def __getitem__(self, index: int):
         img1, target = self.data[index], self.targets[index]
@@ -110,9 +105,9 @@ def load_data(args):
     test_loader = DataLoader(test_data, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
 
     down_train_data = SimSiamDataset(args, downstream=True)
-    down_train_loader = DataLoader(down_train_data, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    down_train_loader = DataLoader(down_train_data, batch_size=args.down_batch_size, shuffle=True, num_workers=args.num_workers)
 
     down_test_data = SimSiamDataset(args, mode='test', downstream=True)
-    down_test_loader = DataLoader(down_test_data, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+    down_test_loader = DataLoader(down_test_data, batch_size=args.down_batch_size, shuffle=False, num_workers=args.num_workers)
 
     return train_loader, test_loader, down_train_loader, down_test_loader
